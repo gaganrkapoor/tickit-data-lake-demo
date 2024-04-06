@@ -5,7 +5,7 @@ from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 from airflow.operators.dummy import DummyOperator
-from airflow.providers.amazon.aws.operators.glue_crawler import AwsGlueCrawlerOperator
+from airflow.providers.amazon.aws.operators.glue_crawler import GlueCrawlerOperator
 from airflow.utils.dates import days_ago
 
 DAG_ID = os.path.basename(__file__).replace(".py", "")
@@ -41,7 +41,7 @@ with DAG(
     )
 
     for crawler in CRAWLERS:
-        crawlers_run = AwsGlueCrawlerOperator(
+        crawlers_run = GlueCrawlerOperator(
             task_id=f"run_{crawler}_crawler", config={"Name": crawler}
         )
 

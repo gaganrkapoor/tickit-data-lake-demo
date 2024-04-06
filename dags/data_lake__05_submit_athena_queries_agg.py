@@ -6,7 +6,7 @@ from airflow.models import Variable
 from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 from airflow.operators.dummy import DummyOperator
-from airflow.providers.amazon.aws.operators.athena import AWSAthenaOperator
+from airflow.providers.amazon.aws.operators.athena import AthenaOperator
 from airflow.utils.dates import days_ago
 
 DAG_ID = os.path.basename(__file__).replace(".py", "")
@@ -118,15 +118,15 @@ with DAG(
 
     end = DummyOperator(task_id="end")
 
-    athena_ctas_submit_category = AWSAthenaOperator(
+    athena_ctas_submit_category = AthenaOperator(
         task_id="athena_ctas_submit_category", query=AGG_TICKIT_SALES_BY_CATEGORY
     )
 
-    athena_ctas_submit_date = AWSAthenaOperator(
+    athena_ctas_submit_date = AthenaOperator(
         task_id="athena_ctas_submit_date", query=AGG_TICKIT_SALES_BY_DATE
     )
 
-    athena_query_by_date = AWSAthenaOperator(
+    athena_query_by_date = AthenaOperator(
         task_id="athena_query_by_date", query="sql_data_lake/query_sales_by_date.sql"
     )
 

@@ -1,0 +1,168 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create an RDS SQL Server database for automated deployments.
+Parameters:
+  SqlServerInstanceName:
+    NoEcho: 'false'
+    Description: RDS SQL Server Instance Name
+    Default: tickitdbinstance
+    Type: String
+    MinLength: '1'
+    MaxLength: '63'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+  MySQLInstanceName:
+    NoEcho: 'false'
+    Description: RDS SQL Server Instance Name
+    Default: tickitmysqldbinstance
+    Type: String
+    MinLength: '1'
+    MaxLength: '63'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+  PostgresSQLInstanceName:
+    NoEcho: 'false'
+    Description: RDS SQL Server Instance Name
+    Default: tickitpostgredbinstance
+    Type: String
+    MinLength: '1'
+    MaxLength: '63'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+  DatabaseUsername:
+    Description: The database admin account user name.
+    Default: masteradmin
+    AllowedPattern: '[a-zA-Z0-9]+'
+    ConstraintDescription: must contain only alphanumeric characters.
+    MaxLength: '16'
+    MinLength: '1'
+    Type: String
+  DatabasePassword:
+    AllowedPattern: ^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+)
+    ConstraintDescription: Must contain only alphanumeric characters with at least one capital letter and one number.
+    Description: The database admin account password.
+    MaxLength: '41'
+    MinLength: '8'
+    NoEcho: 'true'
+    Type: String
+  CIDRIP:
+    Type: String
+    Description: IP range to allow access to the RDS SQL Server instance.
+  myVPC:
+    Type: String
+    Description: Enter the ID of the VPC where the DB instance will be deployed
+  InstanceType:
+    Type: String
+    Default: db.t3.micro
+    Description: Instance type for the RDS SQL Server instance.
+  StorageType:
+    Type: String
+    Description: Instance storage type for the RDS SQL Server instance.
+    Default: gp2
+  AllocatedStorage:
+    Type: String
+    Description: Instance allocated storage type for the RDS SQL Server instance.
+    Default: '20'
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: SQL Instance name, master username and password
+        Parameters:
+          - SqlServerInstanceName
+          - MySQLInstanceName
+          - PostgresSQLInstanceName
+          - DatabaseUsername
+          - DatabasePassword
+        ParameterLabels:
+          SqlServerInstanceName:
+            default: SQL SERVER Instance name
+          MySQLInstanceName:
+            default: My SQL  Instance name
+          PostgresSQLInstanceName:
+            default: Postgres SQL Instance Name
+          DatabaseUsername:
+            default: Master user name
+          DatabasePassword:
+            default: Password
+Resources:
+  SQLServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SQL Server Security Group
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 1433
+          ToPort: 1433
+          CidrIp: !Ref CIDRIP
+      VpcId: !Ref myVPC
+  SQLServerDBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: !Ref AllocatedStorage
+      DBInstanceClass: !Ref InstanceType
+      Engine: sqlserver-ex
+      EngineVersion: 15.00.4236.7.v1
+      DBInstanceIdentifier: !Ref SqlServerInstanceName
+      LicenseModel: license-included
+      MultiAZ: false
+      PubliclyAccessible: true
+      BackupRetentionPeriod: 7
+      StorageType: !Ref StorageType
+      MasterUsername: !Ref DatabaseUsername
+      MasterUserPassword: !Ref DatabasePassword
+      MonitoringInterval: 60
+      MonitoringRoleArn: !GetAtt SampleCloudFormationDBMonitorRole.Arn
+      EnablePerformanceInsights: false
+  MySQLDBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: !Ref AllocatedStorage
+      DBInstanceClass: !Ref InstanceType
+      Engine: mysql
+      EngineVersion: 8.0.33
+      DBInstanceIdentifier: !Ref MySQLInstanceName
+      LicenseModel: general-public-license
+      AutoMinorVersionUpgrade: false
+      MultiAZ: false
+      PubliclyAccessible: true
+      BackupRetentionPeriod: 0
+      StorageType: !Ref StorageType
+      MasterUsername: !Ref DatabaseUsername
+      MasterUserPassword: !Ref DatabasePassword
+      MonitoringInterval: 60
+      MonitoringRoleArn: !GetAtt SampleCloudFormationDBMonitorRole.Arn
+      EnablePerformanceInsights: false
+  PostgresSQLDBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: !Ref AllocatedStorage
+      DBInstanceClass: !Ref InstanceType
+      Engine: postgres
+      EngineVersion: '12.15'
+      DBInstanceIdentifier: !Ref PostgresSQLInstanceName
+      LicenseModel: postgresql-license
+      AutoMinorVersionUpgrade: false
+      MultiAZ: false
+      PubliclyAccessible: true
+      BackupRetentionPeriod: 0
+      StorageType: !Ref StorageType
+      MasterUsername: !Ref DatabaseUsername
+      MasterUserPassword: !Ref DatabasePassword
+      MonitoringInterval: 60      
+      MonitoringRoleArn: !GetAtt SampleCloudFormationDBMonitorRole.Arn
+      EnablePerformanceInsights: false
+  SampleCloudFormationDBMonitorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonRDSEnhancedMonitoringRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - monitoring.rds.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Tags:
+        - Key: project
+          Value: CloudFormation deployment for SQL server

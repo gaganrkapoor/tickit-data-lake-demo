@@ -5,7 +5,7 @@ SELECT d.year,
 	round(sum(cast(s.commission AS DECIMAL(8,2))), 2) AS sum_commission,
 	count(*) AS order_volume
 FROM refined_tickit_public_sales AS s
-	JOIN refined_tickit_public_date AS d USING(dateid)
+	JOIN refined_tickit_public_date_new AS d USING(dateid)
 GROUP BY d.year,
 	d.month
 ORDER BY d.year,
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS agg_tickit_sales_by_category
 WITH (
 	format = 'Parquet',
 	write_compression = 'SNAPPY',
-	external_location = 's3://open-data-lake-demo-us-east-1/tickit/gold/tickit_sales_by_category/',
+	external_location = 's3://tickit-data-lake/gold/tickit_sales_by_category/',
 	partitioned_by = ARRAY [ 'catgroup',
 	'catname' ],
 	bucketed_by = ARRAY [ 'bucket_catname' ],
@@ -47,7 +47,7 @@ FROM refined_tickit_public_sales AS s
 	LEFT JOIN refined_tickit_public_users AS u1 ON u1.userid = s.sellerid
 	LEFT JOIN refined_tickit_public_users AS u2 ON u2.userid = s.buyerid
 	LEFT JOIN refined_tickit_public_event AS e ON e.eventid = s.eventid
-	LEFT JOIN refined_tickit_public_date AS d ON d.dateid = s.dateid
+	LEFT JOIN refined_tickit_public_date_new AS d ON d.dateid = s.dateid
 	LEFT JOIN cat AS c ON c.eventid = s.eventid;
 
 
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS agg_tickit_sales_by_date
 WITH (
 	format = 'Parquet',
 	write_compression = 'SNAPPY',
-	external_location = 's3://open-data-lake-demo-us-east-1/tickit/gold/tickit_sales_by_date/',
+	external_location = 's3://tickit-data-lake/gold/tickit_sales_by_date/',
 	partitioned_by = ARRAY [ 'year', 'month'],
 	bucketed_by = ARRAY [ 'bucket_month' ],
 	bucket_count = 1
@@ -87,7 +87,7 @@ FROM refined_tickit_public_sales AS s
 	LEFT JOIN refined_tickit_public_users AS u1 ON u1.userid = s.sellerid
 	LEFT JOIN refined_tickit_public_users AS u2 ON u2.userid = s.buyerid
 	LEFT JOIN refined_tickit_public_event AS e ON e.eventid = s.eventid
-	LEFT JOIN refined_tickit_public_date AS d ON d.dateid = s.dateid
+	LEFT JOIN refined_tickit_public_date_new AS d ON d.dateid = s.dateid
 	LEFT JOIN cat AS c ON c.eventid = s.eventid;
 
 

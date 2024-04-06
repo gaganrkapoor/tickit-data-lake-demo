@@ -5,7 +5,7 @@ from airflow import DAG
 from airflow.models.baseoperator import chain
 from airflow.operators.bash import BashOperator
 from airflow.operators.dummy import DummyOperator
-from airflow.providers.amazon.aws.operators.glue import AwsGlueJobOperator
+from airflow.providers.amazon.aws.operators.glue import GlueJobOperator
 from airflow.utils.dates import days_ago
 
 DAG_ID = os.path.basename(__file__).replace(".py", "")
@@ -41,7 +41,7 @@ with DAG(
     )
 
     for table in TABLES:
-        start_jobs_refined = AwsGlueJobOperator(
+        start_jobs_refined = GlueJobOperator(
             task_id=f"start_job_{table}_refined",
             job_name=f"tickit_public_{table}_refine",
         )

@@ -13,7 +13,7 @@ DAG_ID = os.path.basename(__file__).replace(".py", "")
 S3_BUCKET = Variable.get("data_lake_bucket")
 
 DEFAULT_ARGS = {
-    "owner": "garystafford",
+    "owner": "GaganKapoor",
     "depends_on_past": False,
     "retries": 0,
     "email_on_failure": False,
@@ -35,7 +35,7 @@ with DAG(
 
     delete_demo_s3_objects = BashOperator(
         task_id="delete_demo_s3_objects",
-        bash_command=f'aws s3 rm "s3://{S3_BUCKET}/tickit/" --recursive',
+        bash_command=f'aws s3 rm "s3://{S3_BUCKET}/" --recursive',
     )
 
     list_demo_s3_objects = BashOperator(

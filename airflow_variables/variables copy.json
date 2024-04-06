@@ -1,0 +1,16 @@
+{
+    "athena_query_results": "ticketgk-demo-bucket/athena/",
+    "bootstrap_bucket": "ticketgk-demo-bucket/bootstrap/",
+    "data_lake_bucket": "ticket-data-lake",
+    "ec2_subnet_id": "<subnet_name>",
+    "emr_ec2_key_pair": "testkeypair",
+    "fail_email": "airflow@example.com",
+    "glue_crawler_iam_role": "AWSGlueServiceRole-demo",
+    "job_flow_role": "AWSGlueServiceRole-demo",
+    "logs_bucket": "ticketgk-demo-bucket/sparkHistoryLogs/",
+    "redshift_unload_iam_role": "<iam_arn>",
+    "release_label": "emr-6.5.0",
+    "service_role": "AWSGlueServiceRole-demo",
+    "sns_topic": "tickettopic",
+    "work_bucket": "ticketgk-demo-bucket/work/"
+}
